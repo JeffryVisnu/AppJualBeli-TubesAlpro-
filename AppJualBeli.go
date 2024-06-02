@@ -47,7 +47,7 @@ func main() {
 	}
 	clearScreen()
 	sisaModal = modal
-	fmt.Println("~~~~~ Selamat Datang di Toko ... ~~~~~\n")
+	fmt.Println("~~~~~ Selamat Datang di Toko SenyuminAja ~~~~~\n")
 	for running {
 		fmt.Println("~~~~~ Main Menu ~~~~~")
 		fmt.Println("1. Modifikasi Data Barang")
