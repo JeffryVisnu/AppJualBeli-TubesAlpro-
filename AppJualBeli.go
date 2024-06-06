@@ -1,6 +1,6 @@
 package main
 
-import ( 
+import (
 	"fmt"
 	"os"
 	"os/exec"
@@ -75,7 +75,7 @@ func main() {
 			running = false
 		} else {
 			clearScreen()
-			fmt.Println("Masukan tidak valid!")
+			fmt.Println("Masukan tidak valid!\n")
 		}
 	}
 }
@@ -128,8 +128,17 @@ func menambahBarang(B *barang, n *int) {
 	fmt.Println("Sisa Modal : ", sisaModal)
 	fmt.Println("\n~ Masukan data barang baru ~")
 	B[*n].idBarang = *n+1
-	fmt.Print("Nama Barang: ")
-	fmt.Scan(&B[*n].nama)
+	validName := false
+    for !validName {
+        fmt.Print("Nama Barang: ")
+        fmt.Scan(&B[*n].nama)
+        if CekNamaDiArray(B, *n, B[*n].nama) {
+            fmt.Println("\nNama barang sudah ada!")
+            fmt.Println("~ Masukkan nama barang yang berbeda ~")
+        } else {
+            validName = true
+        }
+	}
 	fmt.Print("Kategori Barang: ")
 	fmt.Scan(&B[*n].kategori)
 	for B[*n].nama == B[*n].kategori {
@@ -169,13 +178,21 @@ func menambahBarang(B *barang, n *int) {
 	}
 	*n++
 	fmt.Println("Barang Berhasil ditambahkan!")
-	fmt.Println("Sisa modal adalah Rp.",sisaModal,"\n")
 	tampilBarang(*B, *n)
+}
+
+func CekNamaDiArray(B *barang, n int, name string) bool {
+    for i := 0; i < n; i++ {
+        if B[i].nama == name {
+            return true
+        }
+    }
+    return false
 }
 
 func mengeditBarang(B *barang, n int) {
 	var editID,menuEdit int
-	var editNama string
+	var editNama,namaBaru string
 	var cek int
 	var beliBaru,stockBaru int
 	fmt.Println("~~~~ Edit Barang ~~~~")
@@ -199,8 +216,18 @@ func mengeditBarang(B *barang, n int) {
 				fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Beli", "Harga Jual", "Stock Barang")
 				fmt.Printf("%-20d %-20s %-20s %-20d %-20d %-20d\n", B[cek].idBarang, B[cek].nama, B[cek].kategori, B[cek].hargaBeli, B[cek].hargaJual, B[cek].stock)
 				fmt.Println("\n~ Masukan data barang baru ~")
-				fmt.Print("Nama Barang: ")
-				fmt.Scan(&B[cek].nama)
+				validName := false
+				for !validName {
+					fmt.Print("Nama Barang: ")
+					fmt.Scan(&namaBaru)
+					if CekNamaDiArray(B, n, namaBaru) {
+						fmt.Println("\nNama barang sudah ada!")
+						fmt.Println("~ Masukkan nama barang yang berbeda ~")
+					} else {
+						validName = true
+						B[cek].nama = namaBaru
+					}
+				}
 				fmt.Print("Kategori Barang: ")
 				fmt.Scan(&B[cek].kategori)
 				for B[cek].nama == B[cek].kategori {
@@ -260,8 +287,18 @@ func mengeditBarang(B *barang, n int) {
 				fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Beli", "Harga Jual", "Stock Barang")
 				fmt.Printf("%-20d %-20s %-20s %-20d %-20d %-20d\n", B[cek].idBarang, B[cek].nama, B[cek].kategori, B[cek].hargaBeli, B[cek].hargaJual, B[cek].stock)
 				fmt.Println("\n~ Masukan data barang baru ~")
-				fmt.Print("Nama Barang: ")
-				fmt.Scan(&B[cek].nama)
+				validName := false
+				for !validName {
+					fmt.Print("Nama Barang: ")
+					fmt.Scan(&namaBaru)
+					if CekNamaDiArray(B, n, namaBaru) {
+						fmt.Println("\nNama barang sudah ada!")
+						fmt.Println("~ Masukkan nama barang yang berbeda ~")
+					} else {
+						validName = true
+						B[cek].nama = namaBaru
+					}
+				}
 				fmt.Print("Kategori Barang: ")
 				fmt.Scan(&B[cek].kategori)
 				for B[cek].nama == B[cek].kategori {
@@ -342,10 +379,14 @@ func menghapusBarang(B *barang, n *int) {
 			fmt.Scan(&hapusID)
 			cek = cariBarangId(*B,*n,hapusID)
 			if cek != -1 {
-				fmt.Print("Apakah anda yakin akan menghapus data transaksi tersebut?(Y/N): ")
+				clearScreen()
+				fmt.Println("Barang ditemukan!")
+				fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Beli", "Harga Jual", "Stock Barang")
+				fmt.Printf("%-20d %-20s %-20s %-20d %-20d %-20d\n", B[cek].idBarang, B[cek].nama, B[cek].kategori, B[cek].hargaBeli, B[cek].hargaJual, B[cek].stock)
+				fmt.Print("Apakah anda yakin akan menghapus data barang tersebut?(Y/N): ")
 				fmt.Scan(&yakinHapus)
 				if yakinHapus == "Y" || yakinHapus == "y" {
-				sisaModal = sisaModal+ (B[cek].hargaBeli*B[cek].stock)
+				sisaModal = sisaModal+ (B[cek].hargaBeli*B[cek].stock)+hutang
 				for i:=cek;i<*n-1;i++{
 					B[i]=B[i+1]
 					B[i].idBarang = i + 1
@@ -356,7 +397,7 @@ func menghapusBarang(B *barang, n *int) {
 				tampilBarang(*B,*n)
 				} else if yakinHapus == "N" || yakinHapus == "n"{
 					clearScreen()
-					fmt.Println("Transaksi tidak dihapus!")
+					fmt.Println("Barang tidak dihapus!")
 					tampilBarang(*B,*n)
 				} else {
 					clearScreen()
@@ -372,18 +413,32 @@ func menghapusBarang(B *barang, n *int) {
 			fmt.Print("Masukan nama barang yang akan dihapus: ")
 			fmt.Scan(&hapusNama)
 			cek = cariBarangNama(*B,*n,hapusNama)
-			fmt.Print("Apakah anda yakin akan menghapus data transaksi tersebut?(Y/N): ")
-			fmt.Scan(&yakinHapus)
-			sisaModal = sisaModal+ (B[cek].hargaBeli*B[cek].stock)
 			if cek != -1 {
+				clearScreen()
+				fmt.Println("Barang ditemukan!")
+				fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Beli", "Harga Jual", "Stock Barang")
+				fmt.Printf("%-20d %-20s %-20s %-20d %-20d %-20d\n", B[cek].idBarang, B[cek].nama, B[cek].kategori, B[cek].hargaBeli, B[cek].hargaJual, B[cek].stock)
+				fmt.Print("Apakah anda yakin akan menghapus data barang tersebut?(Y/N): ")
+				fmt.Scan(&yakinHapus)
+				if yakinHapus == "Y" || yakinHapus == "y" {
+				sisaModal = sisaModal+ (B[cek].hargaBeli*B[cek].stock)+hutang
 				for i:=cek;i<*n-1;i++{
 					B[i]=B[i+1]
 					B[i].idBarang = i + 1
 				}
-			*n--
-			clearScreen()
-			fmt.Println("\nData barang berhasil dihapus!")
-			tampilBarang(*B,*n)
+				*n--
+				clearScreen()
+				fmt.Println("Data barang berhasil dihapus!\n")
+				tampilBarang(*B,*n)
+				} else if yakinHapus == "N" || yakinHapus == "n"{
+					clearScreen()
+					fmt.Println("Barang tidak dihapus!")
+					tampilBarang(*B,*n)
+				} else {
+					clearScreen()
+					fmt.Println("Masukan tidak valid!\n")
+					menghapusBarang(B,n)
+				}
 			} else {
 				clearScreen()
 				fmt.Println("\nBarang tidak dapat ditemukan!\n")
@@ -543,22 +598,26 @@ func tambahDataTransaksiNama(B *barang,T *transaksi, n,m *int){
 func menuMengeditDataTransaksi(B *barang,T *transaksi, n,m *int){
 	var pilih int
 	fmt.Println("~~~ Menu Edit Data Transaksi ~~~")
-	tampilDataTransaksi(*T,*m)
-	fmt.Println("~~ Edit Transaksi ~~")
-	fmt.Println("1. Edit data transaksi dengan ID transaksi")
-	fmt.Println("2. Kembali")
-	fmt.Print("Masukan Pilihan (1/2): ")	
-	fmt.Scan(&pilih)
-	if pilih == 1 {
-		clearScreen()
-		editDataTransaksi(B,T,n,m)
-	} else if pilih == 2 {
-		clearScreen()
-		return
-	} else {
-		clearScreen()
-		fmt.Println("Masukan tidak valid!\n")
-		menuMengeditDataTransaksi(B,T,n,m)
+	if *m == 0 {
+		fmt.Println("Tidak ada barang yang tersedia!\n")
+	} else { 
+		tampilDataTransaksi(*T,*m)
+		fmt.Println("~~ Edit Transaksi ~~")
+		fmt.Println("1. Edit data transaksi dengan ID transaksi")
+		fmt.Println("2. Kembali")
+		fmt.Print("Masukan Pilihan (1/2): ")	
+		fmt.Scan(&pilih)
+		if pilih == 1 {
+			clearScreen()
+			editDataTransaksi(B,T,n,m)
+		} else if pilih == 2 {
+			clearScreen()
+			return
+		} else {
+			clearScreen()
+			fmt.Println("Masukan tidak valid!\n")
+			menuMengeditDataTransaksi(B,T,n,m)
+		}
 	}
 }
 
@@ -570,7 +629,7 @@ func editDataTransaksi(B *barang,T *transaksi, n,m *int){
 		fmt.Println("Tidak ada barang yang tersedia!\n")
 	} else { 
 		tampilDataTransaksi(*T,*m)
-		fmt.Println("\n~~ Menu Edit Data Transaksi ~~")
+		fmt.Println("~~ Menu Edit Data Transaksi ~~")
 		fmt.Println("1. Edit transaksi (Stock Terjual) menggunakan ID")
 		fmt.Println("2. Kembali")
 		fmt.Print("Masukan Pilihan (1/2): ")
@@ -594,7 +653,8 @@ func editDataTransaksi(B *barang,T *transaksi, n,m *int){
 					keuntungan = keuntungan+(stockBaru-T[cek].stockTerjual)*T[cek].hargaTerjual
 					T[cek].stockTerjual = stockBaru
 					clearScreen()
-					fmt.Println("Data Transaksi berhasil diedit!")
+					fmt.Println("Data Transaksi berhasil diedit!\n")
+					tampilDataTransaksi(*T,*m)
 				} else {
 					clearScreen()
 					fmt.Println("Stock yang tersedia hanya tersisa",B[x].stock)
@@ -619,21 +679,25 @@ func editDataTransaksi(B *barang,T *transaksi, n,m *int){
 func menuMenghapusDataTransaksi(B *barang,T *transaksi, n,m *int){
 	var pilih int
 	fmt.Println("~~~ Menu Hapus Data Transaksi ~~~")
-	tampilDataTransaksi(*T,*m)
-	fmt.Println("1. Hapus data transaksi dengan ID transaksi")
-	fmt.Println("2. Kembali")
-	fmt.Print("Masukan Pilihan (1/2): ")	
-	fmt.Scan(&pilih)
-	if pilih == 1 {
-		 clearScreen()
-		hapusDataTransaksi(B,T,n,m)
-	} else if pilih == 2 {
-		clearScreen()
-		return
-	} else {
-		clearScreen()
-		fmt.Println("Masukan tidak valid!\n")
-		menuMenghapusDataTransaksi(B,T,n,m)
+	if *m == 0 {
+		fmt.Println("Tidak ada barang yang tersedia!\n")
+	} else { 
+		tampilDataTransaksi(*T,*m)
+		fmt.Println("1. Hapus data transaksi dengan ID transaksi")
+		fmt.Println("2. Kembali")
+		fmt.Print("Masukan Pilihan (1/2): ")	
+		fmt.Scan(&pilih)
+		if pilih == 1 {
+			clearScreen()
+			hapusDataTransaksi(B,T,n,m)
+		} else if pilih == 2 {
+			clearScreen()
+			return
+		} else {
+			clearScreen()
+			fmt.Println("Masukan tidak valid!\n")
+			menuMenghapusDataTransaksi(B,T,n,m)
+		}
 	}
 }
 
@@ -646,7 +710,7 @@ func hapusDataTransaksi(B *barang,T *transaksi, n,m *int){
 		fmt.Println("Tidak ada barang yang tersedia!\n")
 	} else { 
 		tampilDataTransaksi(*T,*m)
-		fmt.Println("\n~~ Menu Edit Data Transaksi ~~")
+		fmt.Println("~~ Menu Hapus Data Transaksi ~~")
 		fmt.Println("1. Hapus transaksi menggunakan ID")
 		fmt.Println("2. Kembali")
 		fmt.Print("Masukan Pilihan (1/2): ")
@@ -672,10 +736,12 @@ func hapusDataTransaksi(B *barang,T *transaksi, n,m *int){
 					}
 					*m--
 					clearScreen()
-					fmt.Println("Transaksi berhasil dihapus!")
+					fmt.Println("Transaksi berhasil dihapus!\n")
+					tampilDataTransaksi(*T,*m)
 				} else if yakinHapus == "N" || yakinHapus == "n" {
 					clearScreen()
 					fmt.Println("Transaksi tidak dihapus!")
+					menuMenghapusDataTransaksi(B,T,n,m)
 				} else {
 					clearScreen()
 					fmt.Println("Masukan tidak valid!\n")
@@ -702,9 +768,6 @@ func hapusDataTransaksi(B *barang,T *transaksi, n,m *int){
 func menuUrutkanData(B barang,T transaksi, n,m int) {
 	var pilih int
 	fmt.Println("~~~~~ Menu Mengurutkan Data ~~~~~")
-	if n < 0 || m < 0 {
-		fmt.Println("Tidak ada barang/transaksi yang tersedia!\n")
-	} else {
 		fmt.Println("1. Urutkan Data Barang")
 		fmt.Println("2. Urutkan Data Transaksi")
 		fmt.Println("3. Kembali")
@@ -723,7 +786,6 @@ func menuUrutkanData(B barang,T transaksi, n,m int) {
 			clearScreen()
 			fmt.Println("Masukan tidak valid!\n")
 			menuUrutkanData(B,T,n,m)
-		}
 	}
 }
 
@@ -942,84 +1004,84 @@ func urutkanStockBarangDsc(B *barang, n *int){
 // URUTKAN DATA TRANSAKSI
 func menuUrutkanDataTransaksi(T *transaksi, m *int){
 	var pilih,urutkan int
-	fmt.Println("~~~~~ Urutkan Data Transaksi ~~~~~")
 	if *m <= 0  {
 		fmt.Println("Tidak ada transaksi yang tersedia!\n")
 	} else {
-		fmt.Println("~~ Menu Urutkan Data Barang ~~")
-		fmt.Println("1. Urutkan Data Transaksi berdasarkan ID Transaksi")
-		fmt.Println("2. Urutkan Data Transaksi berdasarkan Harga Jual Barang")
-		fmt.Println("3. Urutkan Data Transaksi berdasarkan Stock Terjual")
-		fmt.Println("4. Kembali")
-		fmt.Print("Masukan pilihan (1/2/3/4): ")
-		fmt.Scan(&pilih)
-		if pilih == 1 {
-			clearScreen()
-			fmt.Println("Urutkan Data Transaksi berdasarkan ID Transaksi secara?")
-			fmt.Println("1. Membesar (Ascending)")
-			fmt.Println("2. Mengecil (Descending)")
-			fmt.Print("Masukan pilihan (1/2): ")
-			fmt.Scan(&urutkan)
-			if urutkan == 1 {
+		fmt.Println("~~~~~ Urutkan Data Transaksi ~~~~~")
+			fmt.Println("~~ Menu Urutkan Data Transaksi ~~")
+			fmt.Println("1. Urutkan Data Transaksi berdasarkan ID Transaksi")
+			fmt.Println("2. Urutkan Data Transaksi berdasarkan Harga Jual Barang")
+			fmt.Println("3. Urutkan Data Transaksi berdasarkan Stock Terjual")
+			fmt.Println("4. Kembali")
+			fmt.Print("Masukan pilihan (1/2/3/4): ")
+			fmt.Scan(&pilih)
+			if pilih == 1 {
 				clearScreen()
-				urutkanIdTransAsc(T,m)
-				tampilDataTransaksi(*T,*m)
-			} else if urutkan == 2{
+				fmt.Println("Urutkan Data Transaksi berdasarkan ID Transaksi secara?")
+				fmt.Println("1. Membesar (Ascending)")
+				fmt.Println("2. Mengecil (Descending)")
+				fmt.Print("Masukan pilihan (1/2): ")
+				fmt.Scan(&urutkan)
+				if urutkan == 1 {
+					clearScreen()
+					urutkanIdTransAsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else if urutkan == 2{
+					clearScreen()
+					urutkanIdTransDsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else {
+					clearScreen()
+					fmt.Println("Masukan tidak valid!\n")
+					menuUrutkanDataTransaksi(T,m)
+				}
+			} else if pilih == 2 {
 				clearScreen()
-				urutkanIdTransDsc(T,m)
-				tampilDataTransaksi(*T,*m)
+				fmt.Println("Urutkan Data Transaksi berdasarkan Harga Jual Barang secara?")
+				fmt.Println("1. Membesar (Ascending)")
+				fmt.Println("2. Mengecil (Descending)")
+				fmt.Print("Masukan pilihan (1/2): ")
+				fmt.Scan(&urutkan)
+				if urutkan == 1 {
+					clearScreen()
+					urutkanHargaJualTransaksiAsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else if urutkan == 2{
+					clearScreen()
+					urutkanHargaJualTransaksiDsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else {
+					clearScreen()
+					fmt.Println("Masukan tidak valid!\n")
+					menuUrutkanDataTransaksi(T,m)
+				}
+			} else if  pilih == 3{
+				clearScreen()
+				fmt.Println("Urutkan Data Transaksi berdasarkan Stock Terjual secara?")
+				fmt.Println("1. Membesar (Ascending)")
+				fmt.Println("2. Mengecil (Descending)")
+				fmt.Print("Masukan pilihan (1/2): ")
+				fmt.Scan(&urutkan)
+				if urutkan == 1 {
+					clearScreen()
+					urutkanStockTerjualAsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else if urutkan == 2{
+					clearScreen()
+					urutkanStockTerjualDsc(T,m)
+					tampilDataTransaksi(*T,*m)
+				} else {
+					clearScreen()
+					fmt.Println("Masukan tidak valid!\n")
+					menuUrutkanDataTransaksi(T,m)
+				}
+			} else if pilih == 4 {
+				clearScreen()
+				return
 			} else {
 				clearScreen()
 				fmt.Println("Masukan tidak valid!\n")
 				menuUrutkanDataTransaksi(T,m)
-			}
-		} else if pilih == 2 {
-			clearScreen()
-			fmt.Println("Urutkan Data Transaksi berdasarkan Harga Jual Barang secara?")
-			fmt.Println("1. Membesar (Ascending)")
-			fmt.Println("2. Mengecil (Descending)")
-			fmt.Print("Masukan pilihan (1/2): ")
-			fmt.Scan(&urutkan)
-			if urutkan == 1 {
-				clearScreen()
-				urutkanHargaJualTransaksiAsc(T,m)
-				tampilDataTransaksi(*T,*m)
-			} else if urutkan == 2{
-				clearScreen()
-				urutkanHargaJualTransaksiDsc(T,m)
-				tampilDataTransaksi(*T,*m)
-			} else {
-				clearScreen()
-				fmt.Println("Masukan tidak valid!\n")
-				menuUrutkanDataTransaksi(T,m)
-			}
-		} else if  pilih == 3{
-			clearScreen()
-			fmt.Println("Urutkan Data Transaksi berdasarkan Stock Terjual secara?")
-			fmt.Println("1. Membesar (Ascending)")
-			fmt.Println("2. Mengecil (Descending)")
-			fmt.Print("Masukan pilihan (1/2): ")
-			fmt.Scan(&urutkan)
-			if urutkan == 1 {
-				clearScreen()
-				urutkanStockTerjualAsc(T,m)
-				tampilDataTransaksi(*T,*m)
-			} else if urutkan == 2{
-				clearScreen()
-				urutkanStockTerjualDsc(T,m)
-				tampilDataTransaksi(*T,*m)
-			} else {
-				clearScreen()
-				fmt.Println("Masukan tidak valid!\n")
-				menuUrutkanDataTransaksi(T,m)
-			}
-		} else if pilih == 4 {
-			clearScreen()
-			return
-		} else {
-			clearScreen()
-			fmt.Println("Masukan tidak valid!\n")
-			menuUrutkanDataTransaksi(T,m)
 		}
 	}
 }
@@ -1101,9 +1163,6 @@ func urutkanHargaJualTransaksiDsc(T *transaksi, m *int){
 func menuCari(B barang, T transaksi, n,m int){
 	var pilih int
 	fmt.Println("~~~~~ Menu Mencari Data ~~~~~")
-	if n < 0 || m < 0 {
-		fmt.Println("Tidak ada barang/transaksi yang tersedia!\n")
-	} else {
 		fmt.Println("1. Cari Data Barang")
 		fmt.Println("2. Cari Data Transaksi")
 		fmt.Println("3. Kembali")
@@ -1122,7 +1181,6 @@ func menuCari(B barang, T transaksi, n,m int){
 			clearScreen()
 			fmt.Println("Masukan tidak valid!\n")
 			menuCari(B,T,n,m)
-		}
 	}
 }
 
@@ -1257,9 +1315,6 @@ func cariTransaksiId(T transaksi, m, cariID int) int {
 func menuTampilData(B barang, T transaksi, n,m int){
 	var pilih int
 	fmt.Println("~~~~~ Tampil Data ~~~~~")
-	if n < 0 || m < 0 {
-		fmt.Println("Tidak ada barang/transaksi yang tersedia!\n")
-	} else {
 		fmt.Println("1. Tampilkan Data Barang")
 		fmt.Println("2. Tampilkan Data Transaksi")
 		fmt.Println("3. Kembali")
@@ -1278,7 +1333,6 @@ func menuTampilData(B barang, T transaksi, n,m int){
 			clearScreen()
 			fmt.Println("Masukan tidak valid!\n")
 			menuTampilData(B,T,n,m)
-		}
 	}
 }
 
@@ -1314,7 +1368,7 @@ func menuTampilDataBarang(B *barang, T *transaksi, n, m *int){
 func tampilBarang(B barang, n int) {
 	if n <=0 {
 		fmt.Println("~~~ Data Barang ~~~")
-		fmt.Println("Tidak ada barang yang tersedia!\n")
+		fmt.Println("Tidak ada barang yang tersedia!")
 	} else {
 		fmt.Println("~~~ Data Barang ~~~")
 		fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Beli", "Harga Jual", "Stock Barang")
@@ -1323,6 +1377,7 @@ func tampilBarang(B barang, n int) {
 		}
 	}
 	fmt.Println()
+	fmt.Println("Sisa modal adalah Rp.",sisaModal,"\n")
 }
 
 func tampilBarangTerlaku(T *transaksi, m *int) {
@@ -1337,6 +1392,7 @@ func tampilBarangTerlaku(T *transaksi, m *int) {
 		fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Transaksi", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Jual", "Stock Terjual")
 		fmt.Printf("%-20d %-20d %-20s %-20s %-20d %-20d\n", T[i].idTransaksi, T[i].idBarangTerjual, T[i].namaTerjual, T[i].kategoriTerjual, T[i].hargaTerjual, T[i].stockTerjual)
 	}
+	fmt.Println()
 }
 
 //MENAMPILKAN DATA TRANSAKSI
@@ -1360,12 +1416,14 @@ func menuTampilDataTransaksi(B *barang, T *transaksi, n,m *int){
 			fmt.Println("~~~ Data Modal ~~~")
 			fmt.Println("Modal awal sebesar: Rp.",modal)
 			fmt.Println("Sisa modal sebesar: Rp.",sisaModal)
+			fmt.Println()
 		} else if pilih == 3 {
 			clearScreen()
 			fmt.Println("~~~ Data Pendapatan ~~~")
 			fmt.Println("Total keuntungan kotor sebesar: Rp.",keuntungan)
 			fmt.Println("Total keuntungan bersih sebesar: Rp.",keuntungan-modal+sisaModal)
 			fmt.Println("Total hutang sebesar: Rp.",hutang)
+			fmt.Println()
 		} else if pilih == 4{
 			clearScreen()
 			menuTampilData(*B,*T,*n,*m)
@@ -1380,7 +1438,7 @@ func menuTampilDataTransaksi(B *barang, T *transaksi, n,m *int){
 func tampilDataTransaksi(T transaksi, m int) {
 	if m <= 0 {
 		fmt.Println("~~~ Data Transaksi ~~~")
-		fmt.Println("Tidak ada transaksi yang tersedia!\n")
+		fmt.Println("Tidak ada transaksi yang tersedia!")
 	} else {
 		fmt.Println("~~~ Data Transaksi ~~~")
 		fmt.Printf("%-20s %-20s %-20s %-20s %-20s %-20s\n", "ID Transaksi", "ID Barang", "Nama Barang", "Kategori Barang", "Harga Jual", "Stock Terjual")
